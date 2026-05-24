@@ -294,7 +294,7 @@
             <div class="lamp-bulb" id="lampBulb"></div>
             <div class="lamp-wire"></div>
             <button class="lamp-switch" id="lampSwitch" aria-label="Bật/Tắt đèn"></button>
-            <span class="lamp-text" id="lampText">Bật đèn để hiện form</span>
+            <span class="lamp-text" id="lampText">Bật đèn</span>
         </section>
     </main>
 
@@ -316,7 +316,7 @@
                 body.classList.toggle('lamp-on');
                 
                 // Thay đổi dòng chữ trạng thái đèn dưới công tắc
-                lampText.innerText = isActive ? "Đèn đang bật" : "Bật đèn để hiện form";
+                lampText.innerText = isActive ? "" : "Bật đèn để hiện form";
             });
 
             // Ẩn / Hiện mật khẩu tương tự bên trang đăng ký
