@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Tích hợp thêm thư viện icon FontAwesome để làm nút ẩn/hiện mật khẩu giống trang đăng ký -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* ==========================================================================
+           1. RESET & BASE STYLES
+           ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111416; /* Mặc định nền tối hẳn khi tắt đèn */
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background-color 0.5s ease;
+        }
+
+        /* Khi BẬT ĐÈN: Nền sáng hơn một chút theo đúng ảnh mẫu */
+        body.lamp-on {
+            background-color: #1a1e21;
+        }
+
+        /* Layout chính bằng Flexbox */
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 800px;
+            justify-content: space-around;
+            align-items: center;
+            padding: 20px;
+            gap: 40px;
+        }
+
+        /* ==========================================================================
+           2. LOGIN CARD STYLES (Ẩn/Hiện theo trạng thái đèn)
+           ========================================================================== */
+        .login-card {
+            background-color: #262c30;
+            padding: 40px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            
+            /* Logic ẩn form mặc định bằng CSS */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px); /* Tạo hiệu ứng trượt nhẹ từ dưới lên */
+            transition: opacity 0.5s ease, visibility 0.5s ease, transform 0.5s ease;
+        }
+
+        /* Khi body có class 'lamp-on' (Đèn bật) -> Hiện form đăng nhập */
+        body.lamp-on .login-card {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .login-card h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative; /* Để định vị icon con mắt tuyệt đối bên trong */
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background-color: #1e2326;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        /* Chừa khoảng trống bên phải cho ô nhập mật khẩu để không đè chữ lên icon mắt */
+        .input-group.pass-group input {
+            padding-right: 45px;
+        }
+
+        .input-group input::placeholder {
+            color: #5c656b;
+        }
+
+        .input-group input:focus {
+            border-color: #ffd02c;
+        }
+
+        /* Icon con mắt ẩn/hiện mật khẩu */
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 15px;
+            color: #5c656b;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .toggle-password:hover {
+            color: #ffd02c;
+        }
+
+        /* Nút Đăng nhập màu vàng */
+        .btn-signin {
+            width: 100%;
+            padding: 14px;
+            background-color: #ffd02c;
+            border: none;
+            border-radius: 8px;
+            color: #1a1e21;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: transform 0.1s ease, background-color 0.3s ease;
+        }
+
+        .btn-signin:hover {
+            background-color: #e6b922;
+        }
+
+        .btn-signin:active {
+            transform: scale(0.98);
+        }
+
+        /* Khối liên kết chuyển hướng sang trang đăng ký */
+        .switch-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 13px;
+            color: #8c969c;
+        }
+
+        .switch-link a {
+            color: #ffd02c;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+            transition: color 0.3s;
+        }
+
+        .switch-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* ==========================================================================
+           3. LAMP & SWITCH STYLES (Cơ chế Đèn)
+           ========================================================================== */
+        .lamp-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            width: 150px;
+        }
+
+        /* Bóng đèn tròn - Mặc định TẮT (màu xám) */
+        .lamp-bulb {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #4a5357; 
+            position: relative;
+            transition: all 0.4s ease;
+        }
+
+        /* Tâm bóng đèn tạo hiệu ứng 3D */
+        .lamp-bulb::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 25px;
+            height: 25px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+        }
+
+        /* Trạng thái khi ĐÈN SÁNG (được thêm class .active bằng JS) */
+        .lamp-bulb.active {
+            background-color: #ffd02c;
+            box-shadow: 0 0 40px #ffd02c, 0 0 80px #ffd02c, 0 0 120px rgba(255, 208, 44, 0.6);
+        }
+
+        .lamp-bulb.active::after {
+            background-color: #ffffff;
+            box-shadow: 0 0 15px #ffffff;
+        }
+
+        /* Dây treo đèn */
+        .lamp-wire {
+            width: 4px;
+            height: 60px;
+            background-color: #4a5357;
+            margin: 4px 0;
+            transition: background-color 0.4s ease;
+        }
+
+        body.lamp-on .lamp-wire {
+            background-color: #6a757a;
+        }
+
+        /* Công tắc đèn hình chữ nhật bo góc */
+        .lamp-switch {
+            width: 60px;
+            height: 16px;
+            background-color: #5c656b;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+        }
+
+        .lamp-switch:hover {
+            background-color: #737d84;
+        }
+
+        .lamp-switch:active {
+            transform: translateY(2px);
+        }
+
+        /* Dòng chữ hướng dẫn */
+        .lamp-text {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #8c969c;
+            user-select: none;
+            text-align: center;
+        }
+
+        /* Responsive di động */
+        @media (max-width: 680px) {
+            .container {
+                flex-direction: column-reverse;
+                gap: 30px;
+            }
+            .lamp-wire {
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main class="container">
+        <section class="login-card" id="loginCard">
+            <h2>Đăng Nhập</h2>
+            <form id="loginForm">
+                <div class="input-group">
+                    <!-- Thay đổi placeholder để hướng dẫn người dùng nhập thông tin linh hoạt -->
+                    <input type="text" id="username" placeholder="Email hoặc Số điện thoại" required autocomplete="off">
+                </div>
+                <div class="input-group pass-group">
+                    <input type="password" id="password" placeholder="Mật khẩu" required>
+                    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                </div>
+                <button type="submit" class="btn-signin">Đăng nhập</button>
+                
+                <div class="switch-link">
+                    Bạn chưa có tài khoản?<a href="dangky1.html">Đăng ký ngay</a>
+                </div>
+            </form>
+        </section>
+
+        <section class="lamp-container">
+            <div class="lamp-bulb" id="lampBulb"></div>
+            <div class="lamp-wire"></div>
+            <button class="lamp-switch" id="lampSwitch" aria-label="Bật/Tắt đèn"></button>
+            <span class="lamp-text" id="lampText">Bật đèn để hiện form</span>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const lampSwitch = document.getElementById('lampSwitch');
+            const lampBulb = document.getElementById('lampBulb');
+            const lampText = document.getElementById('lampText');
+            const body = document.body;
+            const loginForm = document.getElementById('loginForm');
+            const passwordInput = document.getElementById('password');
+            const togglePassword = document.getElementById('togglePassword');
+
+            // ==========================================
+            // 1. XỬ LÝ SỰ KIỆN ĐÈN GIAO DIỆN
+            // ==========================================
+            lampSwitch.addEventListener('click', () => {
+                const isActive = lampBulb.classList.toggle('active');
+                body.classList.toggle('lamp-on');
+                
+                // Thay đổi dòng chữ trạng thái đèn dưới công tắc
+                lampText.innerText = isActive ? "Đèn đang bật" : "Bật đèn để hiện form";
+            });
+
+            // Ẩn / Hiện mật khẩu tương tự bên trang đăng ký
+            togglePassword.addEventListener('click', () => {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                togglePassword.classList.toggle('fa-eye');
+                togglePassword.classList.toggle('fa-eye-slash');
+            });
+
+            // ==========================================
+            // 2. KẾT NỐI VÀ ĐỐI CHIẾU DỮ LIỆU ĐĂNG NHẬP
+            // ==========================================
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault(); 
+
+                const usernameValue = document.getElementById('username').value.trim();
+                const passwordValue = document.getElementById('password').value;
+
+                if (usernameValue === "" || passwordValue === "") {
+                    alert("Vui lòng điền đầy đủ thông tin đăng nhập!");
+                    return;
+                }
+
+                // Thực hiện truy vấn dữ liệu 'registeredUser' được lưu từ file dangky.html
+                const storedData = localStorage.getItem('registeredUser');
+
+                if (!storedData) {
+                    alert("Tài khoản chưa tồn tại trên hệ thống. Vui lòng bấm đăng ký tài khoản mới!");
+                    return;
+                }
+
+                // Chuyển đổi ngược từ chuỗi JSON về đối tượng Object JavaScript
+                const userData = JSON.parse(storedData);
+
+                // Đối chiếu thông tin: Cho phép người dùng đăng nhập bằng Email HOẶC Số điện thoại
+                if ((usernameValue === userData.email || usernameValue === userData.phone) && passwordValue === userData.password) {
+                    alert(`Đăng nhập thành công! Chào mừng trở lại, ${userData.fullName}.`);
+                    
+                    // Bạn có thể chuyển hướng người dùng tới trang quản trị hoặc trang chủ tại đây:
+                    // window.location.href = 'dashboard.html';
+                } else {
+                    alert("Tên đăng nhập (Email/SĐT) hoặc Mật khẩu không chính xác!");
+                }
+            });
+        });
+    </script>
+</body>
+</html>
